@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        home: SplashView()
+        home: const SplashView()
     );
   }
 }
