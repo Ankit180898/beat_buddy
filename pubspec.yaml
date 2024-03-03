@@ -42,6 +42,7 @@ dependencies:
   on_audio_query:
   permission_handler:
   just_audio:
+  miniplayer:
 
 dev_dependencies:
   flutter_test:
