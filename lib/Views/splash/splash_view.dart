@@ -4,21 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/route_manager.dart';
 import '../../Res/constants.dart';
+import '../demo_view.dart';
 
-class SplashView extends StatefulWidget {
+class SplashView extends StatelessWidget {
   const SplashView({super.key});
-  @override
-  State<SplashView> createState() => _SplashViewState();
-}
-class _SplashViewState extends State<SplashView> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    Timer(const Duration(seconds: 3), () {
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage(),));
-    });
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,8 +15,12 @@ class _SplashViewState extends State<SplashView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SvgPicture.asset("assets/music.svg",),
-          const SizedBox(height: defaultPadding/10,),
+          Container(height: MediaQuery.of(context).size.height*0.60,width:MediaQuery.of(context).size.width,decoration:BoxDecoration(
+        borderRadius: BorderRadius.only(bottomRight: Radius.circular(100),bottomLeft:Radius.circular(100) ),
+            color: Colors.black12
+      ),child: ClipRRect(    borderRadius: BorderRadius.circular(100.0),
+      child: Image.network("https://mir-s3-cdn-cf.behance.net/project_modules/fs/8e1029153848787.633b2511e65fb.gif",fit: BoxFit.cover,))),
+          Spacer(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
             child: Text(
@@ -56,7 +49,7 @@ class _SplashViewState extends State<SplashView> {
             padding: const EdgeInsets.symmetric(horizontal: defaultPadding * 3),
             child: GestureDetector(
               onTap: (){
-                Get.offAll(HomeScreen(),curve: ElasticInOutCurve());
+                Get.offAll(DemoView(),curve: ElasticInOutCurve());
               },
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.05,

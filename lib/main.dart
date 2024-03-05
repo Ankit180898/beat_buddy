@@ -2,14 +2,22 @@ import 'package:beat_buddy/Views/splash/splash_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import 'Res/constants.dart';
 
-void main() {
+Future<void> main() async {
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+    notificationColor: Colors.black12
+
+  );
   runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(

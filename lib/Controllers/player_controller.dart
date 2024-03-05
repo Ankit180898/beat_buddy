@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -26,6 +27,7 @@ class PlayerController extends GetxController {
     checkPermissions();
     fetchSongs();
     setupAudioPlayerListeners();
+
   }
 
   checkPermissions() async {
@@ -62,11 +64,25 @@ class PlayerController extends GetxController {
     }
   }
 
-  playSongs(String? url, int index) {
+  void playSongs(String? url, int index) {
+    // Turn off shuffle mode if it's enabled
+    if (shuffleMode.value) {
+      shuffleMode.value = false;
+    }
+
     playingIndex.value = index;
     try {
       audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.parse(url!)),
+        AudioSource.uri(Uri.parse(url!),
+          tag: MediaItem(
+            // Specify a unique ID for each media item:
+            id: '${playlist[index].id}',
+            // Metadata to display in the notification:
+            album: "${playlist[index].album}",
+            title: playlist[index].displayNameWOExt,
+            artUri: Uri.parse('${playlist[index].id}'),
+          ),
+        ),
       );
       audioPlayer.play();
       isPlaying.value = true;
