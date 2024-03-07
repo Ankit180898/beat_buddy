@@ -44,6 +44,7 @@ dependencies:
   just_audio:
   miniplayer:
   just_audio_background: ^0.0.1-beta.11
+  sqflite:
 
 dev_dependencies:
   flutter_test:

@@ -15,6 +15,8 @@ class AppNavigator extends StatefulWidget {
 class _AppNavigatorState extends State<AppNavigator> {
   final controller = Get.put(PlayerController());
   int _selectedIndex = 0;
+  var tapped=false.obs;
+  final PageController _pageController = PageController();
   final List<Widget> _tabs = [
     HomeScreen(),
     PlaylistsScreen(),
@@ -24,6 +26,12 @@ class _AppNavigatorState extends State<AppNavigator> {
     setState(() {
       _selectedIndex = index;
     });
+    tapped.value=true;
+    _pageController.animateToPage(
+      index,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.ease,
+    );
   }
 
   @override
@@ -35,9 +43,14 @@ class _AppNavigatorState extends State<AppNavigator> {
       body: Obx(()=>
         Stack(
           children: [
-            IndexedStack(
-              index: _selectedIndex,
+            PageView(
+              controller: _pageController,
               children: _tabs,
+              onPageChanged: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
             ),
             Positioned(
               left: 0,
@@ -50,19 +63,28 @@ class _AppNavigatorState extends State<AppNavigator> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: secondaryColor,
-        items: const <BottomNavigationBarItem>[
+        items:  <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
+            icon: _selectedIndex==0?Icon(Icons.home_filled,color: primaryColor,):Icon(Icons.home_outlined,color: primaryColor,),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.music_note),
+            icon: _selectedIndex==1?Icon(Icons.library_music,color: primaryColor,):Icon(Icons.library_music_outlined,color: primaryColor,),
             label: 'Playlist',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: primaryColor,
         onTap: _onItemTapped,
+        selectedLabelStyle: TextStyle(
+          color: primaryColor,
+          fontSize: 14,
+        ),
+        unselectedLabelStyle: TextStyle(
+          color: primaryColor,
+          fontSize: 12,
+        ),
+        unselectedItemColor: primaryColor,
       ),
     );
   }

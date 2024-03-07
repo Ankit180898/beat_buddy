@@ -1,3 +1,4 @@
+import 'package:beat_buddy/new_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -5,6 +6,8 @@ import 'package:miniplayer/miniplayer.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import '../../Controllers/player_controller.dart';
 import 'package:beat_buddy/Res/constants.dart';
+
+import '../../Models/playlist_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key});
@@ -43,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                       child: ListView.separated(
                         itemBuilder: (context, index) {
-                          var song = controller.playlist[index];
+                          var song = controller.songsList[index];
                           return ListTile(
                             leading: Container(
                               height: 50,
@@ -110,16 +113,32 @@ class HomeScreen extends StatelessWidget {
                                 },
                               ),
                             ),
+                            onLongPress: () {
+                              // Show bottom sheet when long-pressed
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return buildBottomSheet(controller, index, context);
+                                },
+                              );
+                            },
                           );
                         },
                         separatorBuilder: (context, index) => Divider(
                           color: secondaryColor,
                         ), // Separator between items
-                        itemCount: controller.playlist.length,
+                        itemCount: controller.songsList.length,
                       ),
                     ),
                   ],
                 ),
+                Positioned(top: 0,child: TextButton(
+                  onPressed: (){
+                    Get.to(NewScreen(),
+                    );
+                  },
+                  child: Text("Click me"),
+                )),
                 Positioned(
                   top: MediaQuery.of(context).size.height * 0.35,
                   left: 24,
@@ -164,15 +183,132 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+  Widget buildBottomSheet(PlayerController controller, int index, BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text('Create a new playlist'),
+            onTap: () {
+              Navigator.pop(context); // Close the bottom sheet
+              // Show a popup to input the new playlist name
+              showCreatePlaylistPopup(context, controller, index);
+            },
+          ),
+          Divider(),
+          ListTile(
+            title: Text('Save to existing playlist'),
+            onTap: () {
+              Navigator.pop(context); // Close the bottom sheet
+              // Show a list of existing playlists to choose from
+              // showExistingPlaylistsPopup(context, controller, index);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+  void showCreatePlaylistPopup(BuildContext context, PlayerController controller, int index) {
+    TextEditingController playlistNameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create a new playlist'),
+          content: TextField(
+            controller: playlistNameController,
+            decoration: InputDecoration(
+              hintText: 'Enter playlist name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                String playlistName = playlistNameController.text.trim();
+                if (playlistName.isNotEmpty) {
+                  // Create the new playlist
+                  controller.createPlaylist(playlistName);
+                  Navigator.pop(context); // Close the dialog
+                } else {
+                  // Show a message indicating that playlist name cannot be empty
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Playlist name cannot be empty'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // void showExistingPlaylistsPopup(BuildContext context, PlayerController controller, int index) {
+  //   // Fetch playlists when the dialog is shown
+  //   controller.fetchPlaylists().then((playlists) {
+  //     // Show dialog with existing playlists
+  //     showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: Text('Select a playlist'),
+  //           content: playlists.isNotEmpty
+  //               ? ListView.builder(
+  //             shrinkWrap: true,
+  //             itemCount: playlists.length,
+  //             itemBuilder: (context, index) {
+  //               PlaylistsModel playlist = playlists[index];
+  //               return ListTile(
+  //                 title: Text(playlist.name),
+  //                 onTap: () {
+  //                   // Save the song to the selected playlist
+  //                   controller.addSongToPlaylist(playlist.id, controller.songsList[index].id);
+  //                   Navigator.pop(context); // Close the dialog
+  //                 },
+  //               );
+  //             },
+  //           )
+  //               : Center(
+  //             child: Text('No playlists found'),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () {
+  //                 Navigator.pop(context); // Close the dialog
+  //               },
+  //               child: Text('Cancel'),
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   }).catchError((error) {
+  //     print('Error fetching playlists: $error');
+  //     // Handle error if playlists cannot be fetched
+  //   });
+  // }
+
 }
 
 
 Widget buildMiniPlayer(
     PlayerController controller, int index, BuildContext context) {
-  if (controller.playlist.isEmpty) {
+  if (controller.songsList.isEmpty && controller.isPlaying.value==false) {
     // Handle empty playlist case
     return Container(
-      height: 100,
+      height: MediaQuery.of(context).size.height* 0.10,
       decoration: BoxDecoration(color: secondaryColor),
       child: Column(
         children: [
@@ -258,7 +394,7 @@ Widget buildMiniPlayer(
       ),
     );
   }else{
-    var song = controller.playlist[index];
+    var song = controller.songsList[index];
     return Miniplayer(
       onDismiss: null,
       onDismissed: null,
@@ -370,6 +506,7 @@ Widget buildMiniPlayer(
           );
         } else {
           return Container(
+            height: MediaQuery.of(context).size.height,
             color: secondaryColor,
             child: SingleChildScrollView(
               child: Obx(
